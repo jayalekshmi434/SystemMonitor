@@ -266,7 +266,7 @@ string LinuxParser::User(int pid) {
       }
     }
   }
-  return "0"; 
+  return "Bad ID"; 
  }
 
 // TODO: Read and return the uptime of a process
@@ -284,3 +284,41 @@ long LinuxParser::UpTime(int pid) {
   }
   return 0;
  }
+
+ float LinuxParser::CpuUtilization(int pid) { 
+    std::ifstream stream(kProcDirectory +to_string(pid) +kStatFilename);
+    std::vector<std::string> processData;
+    std::string value;
+    std::string line;
+    int count{0};
+
+    if (stream.is_open()) {
+      std::getline(stream, line);
+      std::istringstream linestream(line);
+      while((linestream >> value) && (count <22)) {
+        processData.push_back(value);
+        count++;
+      }
+    }
+    if(!processData.empty()){
+        float upTime = LinuxParser::UpTime(); 
+      //utime - CPU time spent in user code, measured in clock ticks
+      float utime =std::stof(processData[13]);
+      //#15 stime - CPU time spent in kernel code, measured in clock ticks
+      float stime = std::stof(processData[14]);
+      //#16 cutime - Waited-for children's CPU time spent in user code (in clock ticks)
+      float cutime = std::stof(processData[15]);
+      //#17 cstime - Waited-for children's CPU time spent in kernel code (in clock ticks)
+      float cstime= std::stof(processData[16]);
+      //#22 starttime - Time when the process started, measured in clock ticks
+      float starttime= std::stof(processData[21]);
+
+      float total_time = utime + stime + cutime + cstime;
+      float seconds = upTime - (starttime / sysconf(_SC_CLK_TCK));
+      float cpu_usage = ((total_time /sysconf(_SC_CLK_TCK)) / seconds);
+      
+    return cpu_usage;
+    } 
+    return 0;
+ }
+

@@ -1,4 +1,5 @@
 #include <string>
+#include<cmath>
 
 #include "format.h"
 
@@ -8,11 +9,22 @@ using std::string;
 // INPUT: Long int measuring seconds
 // OUTPUT: HH:MM:SS
 // REMOVE: [[maybe_unused]] once you define the function
-string Format::ElapsedTime(long seconds[[maybe_unused]]) {  
-    long hour = seconds / 3600;
-    long minute = (seconds % 3600) / 60;
-    long second = seconds % 60;
+string Format::AddZero(int t) {
+    if (t==0) 
+        return "00";    
+    else if (t<10) 
+        return "0" + std::to_string(t);
+    else 
+        return std::to_string(t);
+}
+
+string Format::ElapsedTime(long seconds) {  
+    long hour = floor(seconds / 3600);
+    long minute = floor((seconds - hour*3600)/ 60);
+    long second = seconds -hour*3600 -minute*60;
     string time;
-    time= std::to_string(hour)+":" + std::to_string(minute)+":"+std::to_string(second);
+    time= Format::AddZero(hour)+":" + Format::AddZero(minute)+":"+Format::AddZero(second);
     return time;
+
+
    }
